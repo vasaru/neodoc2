@@ -1,0 +1,31 @@
+{
+  "name": "neodoc_api",
+  "version": "0.0.1",
+  "description": "API backend for NeoDoc system",
+  "main": "src/app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "neodoc",
+    "neo4j",
+    "node",
+    "nodejs",
+    "graphql"
+  ],
+  "author": "Henrik Kjellsson <henrik@virtue.se>",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt-nodejs": "0.0.3",
+    "body-parser": "^1.17.2",
+    "cors": "^2.8.4",
+    "express": "^4.15.4",
+    "express-graphql": "^0.6.7",
+    "graphql": "^0.10.5",
+    "morgan": "^1.8.2",
+    "node-neo4j": "^2.0.3",
+    "node-schedule": "^1.2.3",
+    "passport": "^0.3.2",
+    "passport-local": "^1.0.0"
+  }
+}
