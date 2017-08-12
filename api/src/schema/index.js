@@ -21,6 +21,7 @@ type Contact {
 }
 
 type Network {
+  networkId: String!
   name: String!
   vlanid: Int
   gateway: String
@@ -32,7 +33,8 @@ type Network {
 }
 
 type Ipv4Address {
-  ipaddress: String!
+  ipAddressId: String!
+  ipAddress: String!
   network: [Network]
 }
 

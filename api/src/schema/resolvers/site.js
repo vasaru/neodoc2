@@ -1,5 +1,6 @@
 let neo4j = require("neo4j-driver").v1;
 var Network = require("netmask").Netmask;
+var uniqid = require('uniqid');
 
 let driver = neo4j.driver(
   "bolt://localhost",
@@ -35,6 +36,16 @@ const resolveFunctions = {
           return record.get("site").properties;
         });
       });
+    },
+
+    getAllNetworks(_, params) {
+      let session = driver.session();
+      let query = "MATCH (net:Network) RETURN net;";
+      return session.run(query, params).then(result => {
+        return result.records.map(record => {
+          return record.get("net").properties;
+        });
+      });
     }
   },
   Site: {
@@ -51,6 +62,27 @@ const resolveFunctions = {
       });
     }
   },
+  Network: {
+    ipaddresses(net) {
+        console.dir(net);
+      let session = driver.session(),
+        params = { id: net.networkId },
+        query = `
+                MATCH (s:Network {networkId : {id}})-[r:IPADDRESS]-(i) return i
+            `;
+//        console.log(query);
+      return session.run(query, params).then(result => {
+        return result.records.map(record => {
+//            console.log(record.get("i").properties);
+          return record.get("i").properties;
+        });
+      });
+    }
+
+  },
+  Ipv4Address: {
+  },
+
   Mutation: {
     createNetwork(_, args) {
 //      console.log("In createNetwork");
@@ -59,6 +91,7 @@ const resolveFunctions = {
 //      console.dir(net);
       let session = driver.session(),
         params = { 
+            networkId: uniqid(),
             name: args.name,
             vlanid: args.vlanid,
             gateway: args.gateway,
@@ -67,18 +100,18 @@ const resolveFunctions = {
             network: net.base
         }, 
         query = `
-                CREATE (n:Network {name: {name}, gateway: $gateway, network: $network, vlanid: $vlanid})
+                CREATE (n:Network {networkId: {networkId}, name: {name}, gateway: $gateway, network: $network, vlanid: $vlanid})
             `;
 
         var ipquery="";
         net.forEach(function(ip,long,index) {
-            ipquery+="CREATE (ip"+index+":Ipv4Address {ipAddress: \""+ip+"\"})\n";
+            ipquery+="CREATE (ip"+index+":Ipv4Address {ipAddress: \""+ip+"\", ipAddressId: \""+uniqid()+"\"})\n";
             ipquery+="CREATE (n)-[:IPADDRESS]->(ip"+index+")\n";
             ipquery+="CREATE (ip"+index+")-[:NETWORK]->(n)\n";
         })
         query = query+ipquery+"return n"; 
         console.log(query);
-        return session.run(query, args).then(result => {
+        return session.run(query, params).then(result => {
 //                console.log(result.records);
                 return result.records.map(record => {
 //                    console.log(record.get("n").properties);
