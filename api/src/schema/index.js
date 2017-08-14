@@ -4,14 +4,15 @@ const resolvers = require('./resolvers/site');
 
 const schema = `
 type Site {
-        siteId: Int!
-        name: String
-        address: String
-        contacts: [Contact]
+  siteId: String!
+  name: String!
+  address: String
+  location: String
+  contacts: [Contact]
 }
 
 type Contact {
-  contactId: Int!
+  contactId: String!
   name: String!
   phone1: String
   phone2: String
@@ -43,6 +44,7 @@ type Query {
   getSiteById(siteId: Int!): [Site]
   getSiteByName(name: String!): [Site]
   getAllSites: [Site]
+  getAllContacts: [Contact]
   
   getNetworkByVlanId(vlanId: Int!): [Network]
   getNetworkByName(name: String!): [Network]
@@ -59,6 +61,27 @@ type Mutation {
     network: String
     description: String
   ): [Network]
+  createSite (
+    siteId: String
+    name: String!
+    address: String
+    location: String
+  ): [Site]
+  createContact (
+    contactId: String
+    name: String!
+    address: String
+    phone1: String
+    phone2: String
+    email: String
+    email2: String
+    description: String
+  ): [Contact]
+  linkContactToSite (
+    siteId: String!
+    contactId: String!
+  ): [Site]
+  
 }
 
 schema {

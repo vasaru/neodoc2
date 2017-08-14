@@ -38,6 +38,16 @@ const resolveFunctions = {
       });
     },
 
+    getAllContacts(_, params) {
+      let session = driver.session();
+      let query = "MATCH (contact:Contact) RETURN contact;";
+      return session.run(query, params).then(result => {
+        return result.records.map(record => {
+          return record.get("contact").properties;
+        });
+      });
+    },
+    
     getAllNetworks(_, params) {
       let session = driver.session();
       let query = "MATCH (net:Network) RETURN net;";
@@ -51,9 +61,9 @@ const resolveFunctions = {
   Site: {
     contacts(site) {
       let session = driver.session(),
-        params = { id: site.id },
+        params = { siteId: site.siteId },
         query = `
-                MATCH (s:Site {id : $id})-[r:CONTACT]-(c) return c
+                MATCH (s:Site {siteId : $siteId})-[r:CONTACT]-(c) return c
             `;
       return session.run(query, params).then(result => {
         return result.records.map(record => {
@@ -84,6 +94,63 @@ const resolveFunctions = {
   },
 
   Mutation: {
+    createSite(_, args) {
+      let session = driver.session(),
+          query = "CREATE (s:Site {siteId: \""+uniqid()+"\", name: {name}, address: {address}, location: {location}}) return s";
+      console.log(query);
+      return session.run(query, args).then(result => {
+          return result.records.map(record => {
+              return record.get("s").properties
+          });
+        }).catch(function(error) {
+            console.log(error)
+            return({
+                errors: {
+                    message: error
+                }
+            })
+        });
+    },
+    createContact(_, args) {
+      let session = driver.session(),
+          query = "CREATE (c:Contact {contactId: \""+uniqid()+"\", name: {name}, address: {address}, phone1: {phone1}, phone2: {phone2}, email: {email}, email2: {email2}, description: {description}}) return c";
+      console.log(query);
+      return session.run(query, args).then(result => {
+          return result.records.map(record => {
+              return record.get("c").properties
+          });
+        }).catch(function(error) {
+            console.log(error)
+            return({
+                errors: {
+                    message: error
+                }
+            })
+        });
+    },
+    linkContactToSite(_,args) {
+      let session = driver.session(),
+          query = `
+            MATCH (s:Site {siteId: {siteId}}), (c:Contact {contactId: {contactId}})
+            CREATE (s)-[:CONTACT]->(c) return s
+          `;
+      console.log(query);
+      return session.run(query, args).then(result => {
+          return result.records.map(record => {
+              return record.get("s").properties
+          });
+        }).catch(function(error) {
+            console.log(error)
+            return({
+                errors: {
+                    message: error
+                }
+            })
+        });
+
+
+    },
+
     createNetwork(_, args) {
 //      console.log("In createNetwork");
 //      console.log(args);
