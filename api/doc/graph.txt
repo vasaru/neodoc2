@@ -1,0 +1,27 @@
+Sites
+    Name
+    Facility
+
+    Belongs to: Region
+    Has n: Contact
+    Has n: Tenant
+
+Region
+    Name
+
+    Has n: Sites
+
+Tenant
+    Name
+    Group
+    Description
+
+    Belongs to: Sites
+    Belongs to: TenantGroup
+
+    Has n: Racks
+            Prefixes
+            IP Addresses
+            Devices
+            VLANs
+
