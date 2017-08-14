@@ -68,7 +68,7 @@ const resolveFunctions = {
       let session = driver.session(),
         params = { id: net.networkId },
         query = `
-                MATCH (s:Network {networkId : {id}})-[r:IPADDRESS]-(i) return i
+                MATCH (s:Network {networkId : {id}})-[r:IPADDRESS]-(i) return i  order by i.sortIndex 
             `;
 //        console.log(query);
       return session.run(query, params).then(result => {
@@ -96,16 +96,18 @@ const resolveFunctions = {
             vlanid: args.vlanid,
             gateway: args.gateway,
             netmask: net.mask,
+            broadcast: net.broadcast,
+            description: args.description,
             size: net.size,
             network: net.base
         }, 
         query = `
-                CREATE (n:Network {networkId: {networkId}, name: {name}, gateway: $gateway, network: $network, vlanid: $vlanid})
+                CREATE (n:Network {networkId: {networkId}, name: {name}, gateway: $gateway, broadcast: {broadcast}, description: {description}, netmask: {netmask}, network: $network, vlanid: $vlanid })
             `;
 
         var ipquery="";
         net.forEach(function(ip,long,index) {
-            ipquery+="CREATE (ip"+index+":Ipv4Address {ipAddress: \""+ip+"\", ipAddressId: \""+uniqid()+"\"})\n";
+            ipquery+="CREATE (ip"+index+":Ipv4Address {ipAddress: \""+ip+"\", sortIndex: "+index+", ipAddressId: \""+uniqid()+"\" })\n";
             ipquery+="CREATE (n)-[:IPADDRESS]->(ip"+index+")\n";
             ipquery+="CREATE (ip"+index+")-[:NETWORK]->(n)\n";
         })
@@ -119,6 +121,11 @@ const resolveFunctions = {
                 });
             }).catch(function(error) {
                 console.log(error)
+                return({
+                    errors: {
+                        message: error
+                    }
+                })
             });
     }
   }

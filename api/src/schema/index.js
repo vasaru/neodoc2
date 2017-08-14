@@ -35,6 +35,7 @@ type Network {
 type Ipv4Address {
   ipAddressId: String!
   ipAddress: String!
+  sortIndex: Int
   network: [Network]
 }
 
